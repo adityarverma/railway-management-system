@@ -1,0 +1,315 @@
+-- Table structure for table `canc`
+
+CREATE TABLE IF NOT EXISTS `canc` (
+  `pnr` int(11) NOT NULL,
+  `rfare` int(11) DEFAULT '0',
+  PRIMARY KEY (`pnr`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Table structure for table `class`
+
+CREATE TABLE IF NOT EXISTS `class` (
+  `cname` varchar(10) NOT NULL,
+  PRIMARY KEY (`cname`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Table structure for table `classseats`
+
+CREATE TABLE IF NOT EXISTS `classseats` (
+  `trainno` int(11) NOT NULL,
+  `doj` date NOT NULL,
+  `class` varchar(10) NOT NULL,
+  `fare` int(11) NOT NULL,
+  `seatsleft` int(11) NOT NULL,
+  PRIMARY KEY (`trainno`,`doj`,`class`),
+  KEY `class` (`class`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Triggers `classseats`
+
+DROP TRIGGER IF EXISTS `before_insert_on_classseats`;
+DELIMITER //
+CREATE TRIGGER `before_insert_on_classseats` BEFORE INSERT ON `classseats`
+ FOR EACH ROW begin
+if datediff(curdate(),new.doj)>0 then
+SIGNAL SQLSTATE '45000' 
+SET MESSAGE_TEXT = 'Check date!!!';
+end if;
+if new.fare<=0 then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Check fare!!!';
+end if;
+if new.seatsleft<=0 then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Check seats!!!';
+end if;
+end
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `before_update_on_classseats`;
+DELIMITER //
+CREATE TRIGGER `before_update_on_classseats` BEFORE UPDATE ON `classseats`
+ FOR EACH ROW begin
+if datediff(curdate(),new.doj)>0 then 
+SIGNAL SQLSTATE '45000' 
+SET MESSAGE_TEXT = 'check date!!!';
+end if;
+if new.fare<=0 then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Check fare!!!';
+end if;
+if new.seatsleft<=0 then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Check seats!!!';
+end if;
+end
+//
+DELIMITER ;
+
+-- Table structure for table `pd`
+
+CREATE TABLE IF NOT EXISTS `pd` (
+  `pnr` int(11) NOT NULL,
+  `pname` varchar(50) NOT NULL,
+  `page` int(11) NOT NULL,
+  `pgender` varchar(10) NOT NULL,
+  PRIMARY KEY (`pnr`,`pname`,`page`,`pgender`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Triggers `pd`
+--
+DROP TRIGGER IF EXISTS `before_insert_on_pd`;
+DELIMITER //
+CREATE TRIGGER `before_insert_on_pd` BEFORE INSERT ON `pd`
+ FOR EACH ROW begin
+if new.pgender NOT IN ('M','F') then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Enter M:Male F:Female.';
+end if;
+end
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `before_update_on_pd`;
+DELIMITER //
+CREATE TRIGGER `before_update_on_pd` BEFORE UPDATE ON `pd`
+ FOR EACH ROW begin
+if new.pgender NOT IN ('M','F') then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Enter M:Male F:Female.';
+end if;
+end
+//
+DELIMITER ;
+
+-- Table structure for table `resv'
+
+CREATE TABLE IF NOT EXISTS `resv` (
+  `pnr` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
+  `trainno` int(11) NOT NULL,
+  `doj` date NOT NULL,
+  `tfare` int(11) NOT NULL,
+  `class` varchar(50) NOT NULL,
+  `nos` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`pnr`),
+  UNIQUE KEY `UNIQUE` (`id`,`trainno`,`doj`,`status`),
+  KEY `FK_ID` (`id`),
+  KEY `FK_TN_DOJ_C` (`trainno`,`doj`,`class`),
+  KEY `class` (`class`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=41 ;
+
+-- Triggers `resv`
+
+DROP TRIGGER IF EXISTS `after_insert_on_resv`;
+DELIMITER //
+CREATE TRIGGER `after_insert_on_resv` AFTER INSERT ON `resv`
+ FOR EACH ROW begin
+UPDATE classseats SET seatsleft=seatsleft-new.nos where trainno=new.trainno AND class=new.class AND doj=new.doj;
+end
+//
+DELIMITER ;
+DROP TRIGGER IF EXISTS `after_update_on_resv`;
+DELIMITER //
+
+CREATE TRIGGER `after_update_on_resv` AFTER UPDATE ON `resv`
+ FOR EACH ROW begin
+if (new.status='CANCELLED' AND datediff(new.doj,curdate())<=0 ) then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Cancellation Not Possible!!!!';
+end if;
+if (new.status='CANCELLED' AND datediff(new.doj,curdate())>0 )then
+UPDATE classseats SET seatsleft=seatsleft+new.nos where trainno=new.trainno AND class=new.class AND doj=new.doj;
+ if datediff(new.doj,curdate())>=30 then 
+ INSERT INTO canc values (new.pnr,new.tfare);
+ end if;
+ if datediff(new.doj,curdate())<30 then 
+ INSERT INTO canc values (new.pnr,0.5*new.tfare);
+ end if;
+end if;
+end
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `before_insert_on_resv`;
+DELIMITER //
+CREATE TRIGGER `before_insert_on_resv` BEFORE INSERT ON `resv`
+ FOR EACH ROW begin
+if new.tfare<0 then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Negative balance NOT possible';
+end if;
+if new.nos<=0 then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Negative OR 0 seats NOT possible';
+end if;
+if (select seatsleft from classseats where trainno=new.trainno AND class=new.class AND doj=new.doj) < new.nos then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Not enough seats available!!!';
+end if;
+SET new.status='BOOKED';
+end
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `before_update_on_resv`;
+DELIMITER //
+CREATE TRIGGER `before_update_on_resv` BEFORE UPDATE ON `resv`
+ FOR EACH ROW begin
+if new.tfare<0 then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Negative balance NOT possible';
+end if;
+if new.nos<=0 then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Negative OR 0 seats NOT possible';
+end if;
+if (select seatsleft from classseats where trainno=new.trainno AND class=new.class AND doj=new.doj) < new.nos then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Not enough seats available!!!';
+end if;
+end
+//
+DELIMITER ;
+
+-- Table structure for table `station`
+
+CREATE TABLE IF NOT EXISTS `station` (
+  `sname` varchar(50) NOT NULL,
+  PRIMARY KEY (`sname`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Table structure for table `train`
+
+CREATE TABLE IF NOT EXISTS `train` (
+  `trainno` int(11) NOT NULL AUTO_INCREMENT,
+  `tname` varchar(50) NOT NULL,
+  `sp` varchar(50) NOT NULL,
+  `st` time NOT NULL,
+  `dp` varchar(50) NOT NULL,
+  `dd` varchar(10) DEFAULT NULL,
+  `dt` time NOT NULL,
+  PRIMARY KEY (`trainno`),
+  KEY `sp` (`sp`),
+  KEY `dp` (`dp`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
+
+-- Triggers `train`
+
+DROP TRIGGER IF EXISTS `before_insert_on_train`;
+DELIMITER //
+CREATE TRIGGER `before_insert_on_train` BEFORE INSERT ON `train`
+ FOR EACH ROW begin
+if (new.dt<new.st AND new.dd='Day 1') then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Improper Timings';
+end if;
+if (new.dp=new.sp) then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Same Starting & Destination Points not allowed';
+end if;
+end
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `before_update_on_train`;
+DELIMITER //
+CREATE TRIGGER `before_update_on_train` BEFORE UPDATE ON `train`
+ FOR EACH ROW begin
+if (new.dt<new.st AND new.dd='Day 1') then
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Improper Timings';
+end if;
+end
+//
+DELIMITER ;
+
+-- Table structure for table `user`
+
+CREATE TABLE IF NOT EXISTS `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(50) NOT NULL,
+  `emailid` varchar(50) NOT NULL,
+  `mobileno` varchar(10) NOT NULL,
+  `dob` date NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQUEMN` (`mobileno`),
+  UNIQUE KEY `UNIQUEEI` (`emailid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=23 ;
+
+-- Triggers `user`
+
+DROP TRIGGER IF EXISTS `before_insert_on_user`;
+DELIMITER //
+CREATE TRIGGER `before_insert_on_user` BEFORE INSERT ON `user`
+ FOR EACH ROW begin
+if (year(curdate())-year(new.dob))<18 then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Minimum age bar of 18 years.';
+end if;
+end
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `before_update_on_user`;
+DELIMITER //
+CREATE TRIGGER `before_update_on_user` BEFORE UPDATE ON `user`
+ FOR EACH ROW begin
+if (year(curdate())-year(new.dob))<18 then 
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = 'Minimum age bar of 18 years.';
+end if;
+end
+//
+DELIMITER ;
+
+-- Constraints for table `canc`
+
+ALTER TABLE `canc`
+  ADD CONSTRAINT `canc_ibfk_1` FOREIGN KEY (`pnr`) REFERENCES `resv` (`pnr`) ON UPDATE CASCADE;
+
+-- Constraints for table `classseats`
+
+ALTER TABLE `classseats`
+  ADD CONSTRAINT `classseats_ibfk_1` FOREIGN KEY (`trainno`) REFERENCES `train` (`trainno`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `classseats_ibfk_2` FOREIGN KEY (`class`) REFERENCES `class` (`cname`) ON UPDATE CASCADE;
+
+-- Constraints for table `pd`
+
+ALTER TABLE `pd`
+  ADD CONSTRAINT `pd_ibfk_1` FOREIGN KEY (`pnr`) REFERENCES `resv` (`pnr`) ON UPDATE CASCADE;
+
+-- Constraints for table `resv`
+
+ALTER TABLE `resv`
+  ADD CONSTRAINT `resv_ibfk_1` FOREIGN KEY (`id`) REFERENCES `user` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `resv_ibfk_2` FOREIGN KEY (`trainno`, `doj`, `class`) REFERENCES `classseats` (`trainno`, `doj`, `class`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `resv_ibfk_3` FOREIGN KEY (`class`) REFERENCES `class` (`cname`) ON UPDATE CASCADE;
+
+-- Constraints for table `train`
+
+ALTER TABLE `train`
+  ADD CONSTRAINT `train_ibfk_1` FOREIGN KEY (`sp`) REFERENCES `station` (`sname`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `train_ibfk_2` FOREIGN KEY (`dp`) REFERENCES `station` (`sname`) ON UPDATE CASCADE;

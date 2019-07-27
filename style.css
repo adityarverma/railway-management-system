@@ -1,0 +1,320 @@
+@charset 'UTF-8';
+
+@font-face {
+	font-family: 'FontAwesome';
+	src: url('font/fontawesome-webfont.eot?v=3.2.1');
+	src: url('font/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'), url('font/fontawesome-webfont.woff?v=3.2.1') format('woff'), url('font/fontawesome-webfont.ttf?v=3.2.1') format('truetype'), url('font/fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+	body, input, textarea
+	{
+		font-family: 'Source Sans Pro', sans-serif;
+		font-weight: 300;
+		color: #777;
+	}
+	
+	strong, b
+	{
+		font-weight: 400;
+		color: #363636;
+	}
+
+	h1, h2, h3, h4,h5, h6
+	{
+		font-weight: 400;
+		color: #363636;
+	}
+	
+	blockquote
+	{
+		border-left: solid 0.5em #ddd;
+		padding: 1em 0 1em 2em;
+		font-style: italic;
+	}
+	
+	em, i
+	{
+		font-style: italic;
+	}
+	
+	hr
+	{
+		border: 0;
+		border-top: solid 1px #ddd;
+		padding: 1.5em 0 0 0;
+		margin: 1.75em 0 0 0;
+	}
+	
+	sub
+	{
+		position: relative;
+		top: 0.5em;
+		font-size: 0.8em;
+	}
+	
+	sup
+	{
+		position: relative;
+		top: -0.5em;
+		font-size: 0.8em;
+	}
+		
+	table
+	{
+		width: 100%;
+	}
+	
+		table tbody tr:nth-child(2n+2)
+		{
+			background: #f4f4f4;
+		}
+		
+		table td
+		{
+			padding: 0.5em 1em 0.5em 1em;
+			text-align: center;
+		}
+		
+		table th
+		{
+			text-align: center;
+			font-weight: 400;
+			padding: 0.5em 1em 0.5em 1em;
+		}
+	
+		table thead
+		{
+			background: #222222;
+			color: #fff;
+		}
+		
+		table tfoot
+		{
+			background: #eee;
+		}
+		
+		table tbody
+		{
+		}
+
+	form
+	{
+	}
+	
+		form input.text,
+		form select,
+		form textarea
+		{
+			border: 0;
+			background: #f0f0f0;
+			padding: 0.65em;
+			width: 100%;
+		}
+
+		form input.button,
+		form input.text,
+		form select,
+		form textarea
+		{
+			-webkit-appearance: none;
+		}
+		
+		form textarea
+		{
+			height: 15em;
+		}
+		
+		form input:focus,
+		form select:focus,
+		form textarea:focus
+		{
+			background: #f5f5f5;
+		}
+
+		form ::-webkit-input-placeholder
+		{
+			color: #999;
+		}
+
+		form :-moz-placeholder
+		{
+			color: #999;
+		}
+
+		form ::-moz-placeholder
+		{
+			color: #999;
+		}
+
+		form :-ms-input-placeholder
+		{
+			color: #999;
+		}		
+
+	br.clear
+	{
+		clear: both;
+	}
+	
+	p, ul, ol, dl, table, blockquote, form
+	{
+		margin-bottom: 2em;
+	}
+	
+	section,
+	article
+	{
+		margin-bottom: 3em;
+	}
+	
+	section > :last-child,
+	article > :last-child
+	{
+		margin-bottom: 0;
+	}
+
+	section:last-child,
+	article:last-child
+	{
+		margin-bottom: 0;
+	}
+
+	.image
+	{
+		display: inline-block;
+	}
+	
+		.image img
+		{
+			display: block;
+			width: 100%;
+		}
+
+	.image-full
+	{
+		display: block;
+		width: 100%;
+		margin: 0 0 2em 0;
+	}
+	
+	.image-left
+	{
+		float: left;
+		margin: 0 2em 2em 0;
+	}
+	
+	.image-centered
+	{
+		display: block;
+		margin: 0 0 2em 0;
+	}
+
+		.image-centered img
+		{
+			margin: 0 auto;
+			width: auto;
+		}
+		
+	.button
+	{
+		display: inline-block;
+		background-color: #222222;
+		color: #fff;
+		border: 0;
+		cursor: pointer;
+		outline: 0;
+		-moz-transition: background-color .25s ease-in-out;
+		-webkit-transition: background-color .25s ease-in-out;
+		-o-transition: background-color .25s ease-in-out;
+		-ms-transition: background-color .25s ease-in-out;
+		transition: background-color .25s ease-in-out;
+	}
+
+		.button:hover
+		{
+			background-color: #333333;
+		}
+		
+		.button:active
+		{
+			background-color: #444444;
+		}
+	
+		.button-alt
+		{
+			background-color: #777777;
+		}
+
+			.button-alt:hover
+			{
+				background-color: #888888;
+			}
+			
+			.button-alt:active
+			{
+				background-color: #999999;
+			}
+	
+		.button-small
+		{
+		}
+		
+		.button-big
+		{
+		}
+		
+		.button-huge
+		{
+		}
+
+	ul.style1
+	{
+		list-style: disc;
+		padding-left: 1em;
+	}
+	
+		ul.style1 li
+		{
+			padding-left: 0.5em;
+		}
+	
+	ul.links
+	{
+	}
+	
+		ul.links li
+		{
+			display: inline-block;
+		}
+
+			ul.links li:before
+			{
+				display: inline;
+				content: '\2022';
+				opacity: 0.5;
+			}
+		
+			ul.links li:first-child:before
+			{
+				display: none;
+			}
+		
+	ol.style1
+	{
+		list-style: decimal;
+		padding-left: 1.25em;
+	}
+
+		ol.style1 li
+		{
+			padding-left: 0.25em;
+		}
+
+	.byline
+	{
+		display: block;
+		color: #aaa;
+	}
+
