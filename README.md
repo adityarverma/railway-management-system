@@ -13,6 +13,7 @@ To install and run on your pc:-
 site on a web server connected to sql.
 
 For deploying on local host using xampp:-
+
 a)Navigate to folder where xampp is installed. Inside, there is afolder named htdocs, make a folder named railway there. Path would look something like this-"~\xampp\htdocs\railway\". Place the the project files in this folder.
 
 b)Go to xampp control panel and make sure mysql service is in running state.
